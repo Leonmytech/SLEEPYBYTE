@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="it" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sleepybyte.io — Unified Reconnaissance Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .cyber-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); }
+        .terminal-glow { text-shadow: 0 0 8px rgba(52, 211, 153, 0.5); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b1120; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+    </style>
+</head>
+<body class="bg-[#0b1120] text-slate-100 min-h-screen font-sans flex flex-col selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Header -->
+    <header class="border-b border-slate-800 bg-[#0f172a]/80 backdrop-blur sticky top-0 z-50 px-6 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 font-bold cyber-glow">
+                    <i class="fa-solid fa-user-secret text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-lg tracking-wider text-slate-100 flex items-center gap-2">
+                        SLEEPYBYTE<span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">io v3.0</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-mono">Unified Reconnaissance & OSINT Engine</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4 text-xs font-mono text-slate-400">
+                <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded bg-[#131c31] border border-slate-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>NODE: 127.0.0.1 (SECURE)</span>
+                </div>
+                {% if timestamp_now %}
+                <div class="px-3 py-1.5 rounded bg-[#131c31] border border-slate-800 text-blue-400">
+                    {{ timestamp_now }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="max-w-7xl mx-auto p-4 md:p-6 flex-grow w-full space-y-6">
+        
+        <!-- Search Console Form -->
+        <div class="bg-[#111827] border border-slate-800/80 rounded-xl p-5 cyber-glow">
+            <form action="/" method="post" class="space-y-4">
+                <div class="flex flex-wrap gap-2 pb-2 border-b border-slate-800">
+                    <label class="cursor-pointer px-3 py-1 rounded text-xs font-mono bg-blue-600 text-white font-bold" onclick="setModule('all')">ALL</label>
+                    <label class="cursor-pointer px-3 py-1 rounded text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300" onclick="setModule('username')">USER</label>
+                    <label class="cursor-pointer px-3 py-1 rounded text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300" onclick="setModule('discord')">DISCORD</label>
+                    <label class="cursor-pointer px-3 py-1 rounded text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300" onclick="setModule('domain')">DOMAIN</label>
+                    <label class="cursor-pointer px-3 py-1 rounded text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300" onclick="setModule('ip')">IP ADDR</label>
+                    <label class="cursor-pointer px-3 py-1 rounded text-xs font-mono bg-slate-800 hover:bg-slate-700 text-slate-300" onclick="setModule('email')">EMAIL</label>
+                </div>
+                <input type="hidden" name="module" id="moduleInput" value="{{ active_tab if active_tab else 'all' }}">
+                
+                <div class="flex flex-col md:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-500">
+                            <i class="fa-solid fa-terminal"></i>
+                        </span>
+                        <input type="text" name="target" placeholder="Inserisci username, Discord ID, dominio o email target..." value="{{ target if target else '' }}" class="w-full pl-11 pr-4 py-3.5 bg-[#0b1120] border border-slate-700/80 rounded-lg text-slate-100 placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                    </div>
+                    <button type="submit" class="px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-lg font-bold font-mono tracking-wide shadow-lg shadow-blue-600/25 transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> SCANSIONE
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                    <span class="text-slate-500">Quick suggestions:</span>
+                    <span class="text-blue-400 cursor-pointer hover:underline" onclick="document.querySelector('input[name=target]').value='shadow_fox'">@shadow_fox</span>
+                    <span class="text-slate-600">•</span>
+                    <span class="text-blue-400 cursor-pointer hover:underline" onclick="document.querySelector('input[name=target]').value='112233445566778899'">Discord Snowflake</span>
+                </div>
+            </form>
+        </div>
+
+        <!-- AI Analyst Panel -->
+        {% if ai_report %}
+        <div class="bg-[#131c31] border border-blue-500/40 rounded-xl p-5 relative overflow-hidden shadow-xl">
+            <div class="absolute top-0 right-0 p-4 text-blue-500/10 text-6xl pointer-events-none">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <h2 class="text-blue-400 font-bold font-mono text-sm mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-microchip animate-pulse"></i> AI Deep Recon Intelligence Summary
+            </h2>
+            <div class="text-xs font-mono text-slate-300 whitespace-pre-wrap leading-relaxed space-y-2">
+                {{ ai_report }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Results Grid -->
+        {% if data %}
+        <div class="space-y-4">
+            <div class="flex justify-between items-center px-1">
+                <h3 class="font-mono text-sm tracking-wider text-slate-300 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-blue-400"></i> Risultati Moduli Attivi ({{ data | length }})
+                </h3>
+                <div class="flex gap-2">
+                    <button onclick="alert('Export JSON in corso...')" class="px-3 py-1.5 rounded bg-[#131c31] border border-slate-800 hover:border-blue-500 text-xs font-mono text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> JSON
+                    </button>
+                    <button onclick="window.print()" class="px-3 py-1.5 rounded bg-[#131c31] border border-slate-800 hover:border-blue-500 text-xs font-mono text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-pdf"></i> Report HTML
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {% for item in data %}
+                <div class="bg-[#111827] border border-slate-800/80 hover:border-slate-700 rounded-xl p-5 flex flex-col justify-between transition-all">
+                    <div>
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-base text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-globe text-blue-400 text-xs"></i> {{ item.platform }}
+                            </h4>
+                            <span class="text-xs px-2.5 py-1 rounded font-mono {% if item.status == 'Found' %}bg-emerald-500/10 text-emerald-400 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                                {{ item.status }}
+                            </span>
+                        </div>
+                        
+                        <p class="text-xs font-mono text-slate-400 mb-2 truncate">
+                            <b class="text-slate-300">URL:</b> <a href="{{ item.url }}" target="_blank" class="text-blue-400 hover:underline">{{ item.url }}</a>
+                        </p>
+                        
+                        <p class="text-xs font-mono text-slate-400 mb-2">
+                            <b class="text-slate-300">Server IPs:</b> {{ item.ips | join(', ') if item.ips else 'N/A' }}
+                        </p>
+
+                        {% if item.created_at %}
+                        <p class="text-xs font-mono text-purple-400 mb-3 bg-purple-500/10 px-2.5 py-1 rounded border border-purple-500/20">
+                            <b>Account Created:</b> {{ item.created_at }}
+                        </p>
+                        {% endif %}
+
+                        {% if item.meta %}
+                        <div class="bg-[#070b14] p-3 rounded-lg border border-slate-800/80 text-[11px] font-mono text-slate-300 space-y-1 mb-3">
+                            {% for k, v in item.meta.items() %}
+                            <div class="flex justify-between"><span class="text-slate-400">{{ k }}:</span> <span class="text-blue-400 truncate max-w-[160px]">{{ v }}</span></div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if item.wayback and item.wayback.has_archive %}
+                    <div class="pt-3 border-t border-slate-800/80 text-[11px] font-mono flex justify-between items-center text-slate-400">
+                        <span>Wayback Machine:</span>
+                        <a href="{{ item.wayback.archive_url }}" target="_blank" class="text-amber-400 hover:underline">Snapshot ({{ item.wayback.date }})</a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer CLI bar -->
+    <footer class="border-t border-slate-800 bg-[#0f172a] py-3 px-6 text-center text-xs font-mono text-slate-500">
+        sleepybyte.io engine active — Unauthorised intelligence gathering is restricted.
+    </footer>
+
+    <script>
+        function setModule(mod) {
+            document.getElementById('moduleInput').value = mod;
+            document.querySelectorAll('form .flex-wrap label').forEach(el => {
+                el.classList.remove('bg-blue-600', 'text-white', 'font-bold');
+                el.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            event.target.classList.remove('bg-slate-800', 'text-slate-300');
+            event.target.classList.add('bg-blue-600', 'text-white', 'font-bold');
+        }
+    </script>
+</body>
+</html>
